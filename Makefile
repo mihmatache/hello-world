@@ -7,6 +7,7 @@ DOCKER_REPO?="mmatache"
 IMAGE?=$(DOCKER_REPO)/$(APP)
 ADDRESS?="127.0.0.1"
 TIMEOUT?=5
+CHART_NAME?=$(APP)
 
 
 ifeq ($(VERSION),)
@@ -45,7 +46,7 @@ push-images: image
 	docker push $(IMAGE):$(VERSION) 
 
 helm-install:
-	helm install --set image.tag=$(VERSION) --replace $(APP) ./deployments/helm/$(APP)
+	helm install --set image.tag=$(VERSION) --replace $(CHART_NAME) --set service.name=$(CHART_NAME) --set service.Port=$(PORT) ./deployments/helm/$(APP)
 
 helm-uninstall:
 	helm uninstall $(APP)

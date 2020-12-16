@@ -12,3 +12,4 @@ image:
 service:
   type: ClusterIP
   port: 5000
+  name: hello-world
