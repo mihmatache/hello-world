@@ -1,8 +1,8 @@
 FROM alpine:3.7
 
 
-COPY _build/hello /usr/bin/hello
+COPY _bin/hello-world /usr/bin/hello-world
 
 ENV PORT=5000
 
-CMD shop grpc server --port ${PORT}
+CMD hello-world grpc server --port ${PORT}
