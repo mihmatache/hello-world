@@ -46,7 +46,7 @@ push-images: image
 	docker push $(IMAGE):$(VERSION) 
 
 helm-install:
-	helm install --set image.tag=$(VERSION) --replace $(CHART_NAME) --set service.name=$(CHART_NAME) --set service.Port=$(PORT) ./deployments/helm/$(APP)
+	helm install --set image.tag=v1.0.0-4-g47223da --replace $(CHART_NAME) --set service.name=$(CHART_NAME) --set service.Port=$(PORT) ./deployments/helm/$(APP)
 
 helm-uninstall:
 	helm uninstall $(APP)
