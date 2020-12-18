@@ -1,6 +1,6 @@
 package greetings
 
-import(
+import (
 	"os"
 )
 

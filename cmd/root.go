@@ -29,8 +29,7 @@ var port string
 var rootCmd = &cobra.Command{
 	Use:   "hello-world",
 	Short: "A hello world app that acts both as a client",
-	Long: `A hello world app that acts both as a client and a server for gRPC and HTTP`,
-	
+	Long:  `A hello world app that acts both as a client and a server for gRPC and HTTP`,
 }
 
 func Execute() {

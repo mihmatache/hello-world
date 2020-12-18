@@ -1,6 +1,6 @@
 package grpc
 
-import(
+import (
 	"context"
 	"encoding/json"
 	"fmt"
@@ -12,11 +12,9 @@ import(
 
 	helloApi "github.com/mihmatache/hello-world/pkg/api/hello"
 	"github.com/mihmatache/hello-world/pkg/greetings"
-
-
 )
 
-func StartServer(port string) error{
+func StartServer(port string) error {
 	log.Printf("Starting gRPC server on port %s", port)
 	s := grpc.NewServer()
 	defer s.GracefulStop()
@@ -25,7 +23,7 @@ func StartServer(port string) error{
 	if err != nil {
 		return err
 	}
-	
+
 	err = s.Serve(lis)
 	if err != nil {
 		return err
@@ -33,20 +31,32 @@ func StartServer(port string) error{
 	return nil
 }
 
-type Greetings struct {}
+type Greetings struct{}
 
 func (h Greetings) Hello(ctx context.Context, msg *helloApi.HelloMessage) (*helloApi.HelloMessage, error) {
 	log.Printf("%s said hello", msg.Name)
 	return Hello(), nil
 }
 
-func ClientCall(address, port string, timeout int) ([]byte, error) {
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", address, port), grpc.WithInsecure())
-	if err != nil {
-		return nil, err
+func ClientCall(address, port string, authority string, timeout int) ([]byte, error) {
+	var conn *grpc.ClientConn
+	var err error
+	if len(authority) == 0 {
+		conn, err = grpc.Dial(fmt.Sprintf("%s:%s", address, port), grpc.WithInsecure())
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		conn, err = grpc.Dial(fmt.Sprintf("%s:%s", address, port),
+			grpc.WithInsecure(),
+			grpc.WithAuthority(authority),
+		)
+		if err != nil {
+			return nil, err
+		}
 	}
 	client := helloApi.NewGreetingsClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout) * time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
 	defer cancel()
 	reply, err := client.Hello(ctx, Hello())
 	if err != nil {
@@ -59,9 +69,9 @@ func ClientCall(address, port string, timeout int) ([]byte, error) {
 	return b, nil
 }
 
-func Hello() *helloApi.HelloMessage{
+func Hello() *helloApi.HelloMessage {
 	return &helloApi.HelloMessage{
 		Message: "Hello from",
-		Name: greetings.Name,
+		Name:    greetings.Name,
 	}
 }

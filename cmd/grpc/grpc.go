@@ -24,14 +24,16 @@ import (
 )
 
 var (
-	address string
-	timeout int
+	address   string
+	authority string
+	timeout   int
 )
 
-func init(){
+func init() {
 	Cmd.AddCommand(server)
 	Cmd.AddCommand(client)
 	client.Flags().StringVar(&address, "address", "127.0.0.1", "address of the gRPC server")
+	client.Flags().StringVar(&authority, "authority", "", "authority to use when calling")
 	client.Flags().IntVar(&timeout, "timeout", 30, "call timeout")
 }
 
@@ -39,14 +41,13 @@ func init(){
 var Cmd = &cobra.Command{
 	Use:   "grpc",
 	Short: "gRPC type connections",
-	Long: `gRPC type connections will be used. You can either call it as a `,
+	Long:  `gRPC type connections will be used. You can either call it as a `,
 }
-
 
 var server = &cobra.Command{
 	Use:   "server",
 	Short: "gRPC server start",
-	Long: `Start a gRPC hello server`,
+	Long:  `Start a gRPC hello server`,
 	Run: func(cmd *cobra.Command, args []string) {
 		port, err := cmd.Flags().GetString("port")
 		if err != nil {
@@ -62,7 +63,7 @@ var server = &cobra.Command{
 var client = &cobra.Command{
 	Use:   "client",
 	Short: "gRPC client start",
-	Long: `Start a gRPC hello client`,
+	Long:  `Start a gRPC hello client`,
 	Run: func(cmd *cobra.Command, args []string) {
 		port, err := cmd.Flags().GetString("port")
 		if err != nil {
@@ -71,7 +72,7 @@ var client = &cobra.Command{
 		if err != nil {
 			panic(err)
 		}
-		b, err := grpcHello.ClientCall(address, port, timeout)
+		b, err := grpcHello.ClientCall(address, port, authority, timeout)
 		if err != nil {
 			panic(err)
 		}
