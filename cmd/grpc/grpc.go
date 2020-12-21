@@ -16,24 +16,38 @@ limitations under the License.
 package grpc
 
 import (
+	"context"
+	"crypto/tls"
 	"fmt"
+	"io/ioutil"
+	"time"
 
 	"github.com/spf13/cobra"
+	"google.golang.org/grpc"
 
+	"github.com/mihmatache/hello-world/pkg/certificates"
 	grpcHello "github.com/mihmatache/hello-world/pkg/grpc"
 )
 
 var (
-	address   string
 	authority string
+	rootCA    string
+	cert      string
+	key       string
+	isTls     bool
+	isMtls    bool
 	timeout   int
 )
 
 func init() {
 	Cmd.AddCommand(server)
 	Cmd.AddCommand(client)
-	client.Flags().StringVar(&address, "address", "127.0.0.1", "address of the gRPC server")
 	client.Flags().StringVar(&authority, "authority", "", "authority to use when calling")
+	Cmd.PersistentFlags().StringVar(&rootCA, "rootCA", "", "authority to use when calling")
+	Cmd.PersistentFlags().StringVar(&cert, "cert", "", "authority to use when calling")
+	Cmd.PersistentFlags().StringVar(&key, "key", "", "authority to use when calling")
+	Cmd.PersistentFlags().BoolVar(&isTls, "tls", false, "Set security to TLS")
+	Cmd.PersistentFlags().BoolVar(&isMtls, "mtls", false, "Set security to mTLS")
 	client.Flags().IntVar(&timeout, "timeout", 30, "call timeout")
 }
 
@@ -53,7 +67,22 @@ var server = &cobra.Command{
 		if err != nil {
 			panic(err)
 		}
-		err = grpcHello.StartServer(port)
+		options := make([]grpc.ServerOption, 0)
+		if isTls || isMtls {
+			conf := &tls.Config{}
+			err := certificates.SetTLSCertificates(conf, cert, key)
+			if err != nil {
+				panic(err)
+			}
+			if isTls {
+				conf.ClientAuth = tls.NoClientCert
+			} else {
+				conf.ClientAuth = tls.RequireAndVerifyClientCert
+			}
+			options = append(options, grpc.Creds(certificates.MakeCredentials(conf)))
+		}
+		fmt.Println(len(options))
+		err = grpcHello.StartServer(port, options)
 		if err != nil {
 			panic(err)
 		}
@@ -65,14 +94,35 @@ var client = &cobra.Command{
 	Short: "gRPC client start",
 	Long:  `Start a gRPC hello client`,
 	Run: func(cmd *cobra.Command, args []string) {
-		port, err := cmd.Flags().GetString("port")
-		if err != nil {
-			panic(err)
+
+		if len(args) != 1 {
+			panic(fmt.Errorf("Please provide a single address to the command"))
 		}
-		if err != nil {
-			panic(err)
+
+		client := grpcHello.NewClient(args[0])
+		if authority != "" {
+			client.WithOption(grpc.WithAuthority(authority))
 		}
-		b, err := grpcHello.ClientCall(address, port, authority, timeout)
+		if !isTls && !isMtls {
+			client.WithOption(grpc.WithInsecure())
+		} else {
+			rootCert, err := ioutil.ReadFile(rootCA)
+			if err != nil {
+				panic(err)
+			}
+			conf := &tls.Config{}
+			err = certificates.SetRootTLSCert(conf, rootCert)
+			if err != nil {
+				panic(err)
+			}
+			if isMtls {
+				certificates.SetTLSCertificates(conf, cert, key)
+			}
+			client.WithOption(grpc.WithTransportCredentials(certificates.MakeCredentials(conf)))
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
+		defer cancel()
+		b, err := grpcHello.ClientCall(ctx, client)
 		if err != nil {
 			panic(err)
 		}

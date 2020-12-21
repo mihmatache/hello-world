@@ -8,8 +8,8 @@ spec:
   type: {{ .Values.service.type }}
   ports:
     - port: {{ .Values.service.port }}
-      targetPort: grpc
+      targetPort: connection
       protocol: TCP
-      name: grpc
+      name: connection
   selector:
     app: {{ .Values.service.name }}

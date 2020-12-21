@@ -37,7 +37,7 @@ run-server: build
 	$(BIN_DIR)/$(APP) grpc server --port $(PORT)
 
 run-client: build
-	$(BIN_DIR)/$(APP) grpc client --port $(PORT) --address $(ADDRESS) --timeout $(TIMEOUT)
+	$(BIN_DIR)/$(APP) grpc client --timeout $(TIMEOUT) 127.0.0.1:5000
 
 image: build
 	docker build -t $(IMAGE):$(VERSION) .
