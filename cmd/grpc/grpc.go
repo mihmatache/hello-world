@@ -81,7 +81,6 @@ var server = &cobra.Command{
 			}
 			options = append(options, grpc.Creds(certificates.MakeCredentials(conf)))
 		}
-		fmt.Println(len(options))
 		err = grpcHello.StartServer(port, options)
 		if err != nil {
 			panic(err)

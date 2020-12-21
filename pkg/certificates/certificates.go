@@ -18,8 +18,6 @@ func SetRootTLSCert(config *tls.Config, rootCA []byte) error {
 }
 
 func SetTLSCertificates(conf *tls.Config, cert string, key string) error {
-	fmt.Println(len(cert))
-	fmt.Println(len(key))
 	if len(cert) == 0 || len(key) == 0 {
 		return fmt.Errorf("Please proivide a client certificate or key")
 	}
