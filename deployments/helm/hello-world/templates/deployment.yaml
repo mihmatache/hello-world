@@ -19,10 +19,8 @@ spec:
         - name: {{ .Values.service.name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: ["{{ .Values.serverType }}", "server", "--port={{ .Values.service.port}}"]
           ports:
             - name: connection
               containerPort: {{ .Values.service.port}}
               protocol: TCP
-          env:
-            - name: PORT
-              value: {{ .Values.service.port | quote }}
