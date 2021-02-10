@@ -18,11 +18,16 @@ import (
 
 
 func StartServer(port string, options []grpc.ServerOption) error {
+	logger, err := zap.NewDevelopment()
+		if err != nil{
+			return err
+		}
 	streamInterceptors := []grpc.StreamServerInterceptor{
-		grpc_zap.StreamServerInterceptor(zap.NewExample()),
+		
+		grpc_zap.StreamServerInterceptor(logger),
 	}
 	unaryInterceptors := []grpc.UnaryServerInterceptor{
-		grpc_zap.UnaryServerInterceptor(zap.NewExample()),
+		grpc_zap.UnaryServerInterceptor(logger),
 	}
 	options = append(options, grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(streamInterceptors...)), grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(unaryInterceptors...)))
 	log.Printf("Starting gRPC server on port %s", port)

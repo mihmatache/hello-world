@@ -21,6 +21,7 @@ import (
 	"os"
 
 	"github.com/mihmatache/hello-world/cmd/grpc"
+	"github.com/mihmatache/hello-world/cmd/http"
 )
 
 var port string
@@ -42,4 +43,5 @@ func Execute() {
 func init() {
 	rootCmd.PersistentFlags().StringVar(&port, "port", "5000", "default port to use")
 	rootCmd.AddCommand(grpc.Cmd)
+	rootCmd.AddCommand(http.Cmd)
 }
